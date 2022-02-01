@@ -12,7 +12,7 @@ class Routes extends Component {
 		return (
 			<div>
 				<Switch>
-					<Route path="/home" component={Home} />
+					<Route exact path="/" component={Home} />
 					<Route path="/calendar" component={Calendar} />
 					<Route path="/next" component={Next} />
 				</Switch>
