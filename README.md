@@ -2,6 +2,8 @@
 
 This app is designed to scrape the web for ATP and WTA tennis tournaments and upload them to a subscribable Google calendar. This app uses Nightmare.js and Google Apis to accomplish this.
 
+Ckeckout the app at: https://tennis-events.herokuapp.com/
+
 ## Start
 
 This repo can be forked and cloned from https://github.com/CDelancy19/Stackathon.
