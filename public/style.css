@@ -1,21 +1,46 @@
 body {
-  font-family: sans-serif;
+	font-family: sans-serif;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: url('https://i.pinimg.com/originals/c2/c0/c0/c2c0c05ea5db1052230fd76046fc3097.jpg')
+		no-repeat;
+	background-position: center;
+	background-size: cover;
+	padding-top: 10rem;
+	padding-bottom: 10rem;
 }
 
 a {
-  text-decoration: none;
+	text-decoration: none;
 }
 
 label {
-  display: block;
+	display: block;
 }
 
 nav a {
-  display: inline-block;
-  margin: 1em;
+	display: inline-block;
+	margin: 1em;
 }
 
 form div {
-  margin: 1em;
-  display: inline-block;
+	margin: 1em;
+	display: inline-block;
+}
+
+.home-page {
+	display: flex;
+	align-items: center;
+	width: 75vw;
+	justify-content: center;
+	flex-direction: column;
+	background: rgba(82, 74, 74, 0.465);
+	background-position: center;
+	background-size: cover;
+	padding-top: 10rem;
+	padding-bottom: 10rem;
+	color: #fff;
+	text-align: center;
+	flex-wrap: wrap;
 }
