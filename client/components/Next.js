@@ -9,13 +9,7 @@ export default function Next() {
 				I didn't get to add as many features as I wanted to so here is a list
 			</p>
 
-			<Accordion defaultActiveKey="0">
-				<Accordion.Item eventKey="0">
-					<Accordion.Header as={'h6'}>Heroku Deployment</Accordion.Header>
-					<Accordion.Body>
-						I want to deploy my site to heroku and have it published for personal use
-					</Accordion.Body>
-				</Accordion.Item>
+			<Accordion defaultActiveKey="1">
 				<Accordion.Item eventKey="1">
 					<Accordion.Header as={'h6'}>Auto Updates</Accordion.Header>
 					<Accordion.Body>

@@ -7,8 +7,8 @@ body {
 		no-repeat;
 	background-position: center;
 	background-size: cover;
-	padding-top: 10rem;
-	padding-bottom: 10rem;
+	padding-top: 10vh;
+	padding-bottom: 10vh;
 }
 
 a {
@@ -43,4 +43,73 @@ form div {
 	color: #fff;
 	text-align: center;
 	flex-wrap: wrap;
+}
+
+.accordion,
+.accordion-item,
+button.accordion-button {
+	width: 60vw;
+	background: rgba(0, 0, 0, 0.24);
+	color: #fff;
+}
+
+
+.accordion-item:first-of-type .accordion-button {
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
+}
+button:focus:not(:focus-visible) {
+    outline: 0;
+}
+
+.accordion-button:hover {
+    z-index: 2;
+		background-color: #696c72;
+}
+.accordion-button:not(.collapsed) {
+    color: #ffffff;
+    background-color: #454950;
+}
+
+.accordion-button:focus {
+	z-index: 3;
+	border-color: #dbdbdb;
+	outline: 0;
+	box-shadow: 0 0 0 0.25rem #dbdbdb/ 25%;
+}
+
+.calendar {
+	width: 91vw;
+	height: 67vh;
+}
+
+.footer{
+	color: white;
+	text-decoration: none;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	background: black;
+	padding: 2vw;
+}
+
+@media only screen and (max-width: 844px) {
+	body {
+		padding-top: 5vh;
+		padding-bottom: 5vh;
+	}
+
+	.calendar {
+		margin-left: 100px;
+		margin-right: 10px;
+		width: 120vw;
+		height: 65vh;
+	}
+
+	.navbar,
+	.home-page {
+		width: 120vw;
+		margin-left: 100px;
+		margin-right: 10px;
+	}
 }
