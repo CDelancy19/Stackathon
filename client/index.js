@@ -6,10 +6,13 @@ import history from './history';
 import store from './store';
 import App from './App';
 // import 'bootstrap/dist/css/bootstrap.min.css';
+import netlifyIdentity from 'netlify-identity-widget';
+
+netlifyIdentity.init();
 
 ReactDOM.render(
-	<Provider store={store}>
-		<Router history={history}>
+        <Provider store={store}>
+                <Router history={history}>
 			<App />
 		</Router>
 	</Provider>,
