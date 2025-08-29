@@ -37,7 +37,8 @@
     "pg": "^8.5.1",
     "react-bootstrap": "^2.1.0",
     "react-google-calendar-api": "^1.4.0",
-    "sequelize": "^6.3.5"
+    "sequelize": "^6.3.5",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
