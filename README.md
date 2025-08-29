@@ -11,6 +11,16 @@ After cloning to your machine run `npm install` to install needed dependencies.
 The app now uses SQLite for storage by default, so no PostgreSQL configuration is required.
 Running `npm run start:dev` will both start your server and build your client side files using webpack. After running, the app will immediately scrape for current tournaments.
 
+### RapidAPI Tennis Search
+
+The server exposes a proxy endpoint to the [Tennis API – ATP WTA ITF](https://rapidapi.com/). Set your RapidAPI key in the environment variable `RAPIDAPI_KEY` before starting the server:
+
+```bash
+RAPIDAPI_KEY=your_key npm start
+```
+
+Then you can query the API via `/api/tennis/search?q=player` to search for players or tournaments. The key is read from `process.env` so it stays out of version control.
+
 ## Netlify Identity and Neon
 
 Sample Netlify Functions have been added under `netlify/functions` to illustrate how to use Netlify Identity JWTs with a Neon (Postgres) database. Provide a `DATABASE_URL` environment variable and the functions can store and retrieve favorited players and match subscriptions for authenticated users.
