@@ -40,7 +40,7 @@ export const Home = () => {
         <h4>ATP Top 10</h4>
         <ol>
           {info.atpTop.map((p) => (
-            <li key={p.id || p.name}>{p.name || p.full_name}</li>
+            <li key={p.id}>{p.position ? `#${p.position} ${p.name}` : p.name}</li>
           ))}
         </ol>
       </section>
@@ -49,7 +49,7 @@ export const Home = () => {
         <h4>WTA Top 10</h4>
         <ol>
           {info.wtaTop.map((p) => (
-            <li key={p.id || p.name}>{p.name || p.full_name}</li>
+            <li key={p.id}>{p.position ? `#${p.position} ${p.name}` : p.name}</li>
           ))}
         </ol>
       </section>

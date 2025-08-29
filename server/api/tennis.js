@@ -4,40 +4,60 @@ const fs = require('fs')
 const path = require('path')
 
 const cachePath = path.join(__dirname, '..', 'cache', 'homeData.json')
+const API_HOST = 'tennis-api-atp-wta-itf.p.rapidapi.com'
 
 // Helper to fetch tournaments currently being played
 const fetchCurrentTournaments = async () => {
   if (!process.env.RAPIDAPI_KEY) return []
 
-  const options = {
-    method: 'GET',
-    url: 'https://tennis-api-atp-wta-itf.p.rapidapi.com/tennis/current/tournaments',
-    headers: {
-      'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-      'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com',
-    },
+  const year = new Date().getFullYear()
+  const headers = {
+    'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+    'x-rapidapi-host': API_HOST,
   }
 
-  const { data } = await axios.request(options)
-  return data?.data || []
+  const today = new Date()
+  const tours = ['atp', 'wta']
+  const results = []
+
+  await Promise.all(
+    tours.map(async (tour) => {
+      const url = `https://${API_HOST}/tennis/v2/${tour}/tournament/calendar/${year}`
+      const { data } = await axios.get(url, { headers })
+      const events = data?.data || []
+
+      events.forEach((evt) => {
+        const start = evt.date ? new Date(evt.date) : null
+        if (!start) return
+        const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24))
+        if (diffDays >= 0 && diffDays <= 7) {
+          results.push({ id: evt.id, name: evt.name })
+        }
+      })
+    })
+  )
+
+  return results
 }
 
 // Helper to fetch top ranked players for a tour
 const fetchTopPlayers = async (tour) => {
   if (!process.env.RAPIDAPI_KEY) return []
 
-  const options = {
-    method: 'GET',
-    url: `https://tennis-api-atp-wta-itf.p.rapidapi.com/tennis/rankings/${tour}`,
-    headers: {
-      'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-      'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com',
-    },
+  const headers = {
+    'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+    'x-rapidapi-host': API_HOST,
   }
 
-  const { data } = await axios.request(options)
-  const rankings = data?.data || []
-  return rankings.slice(0, 10)
+  const url = `https://${API_HOST}/tennis/v2/${tour}/ranking/singles/`
+  const { data } = await axios.get(url, { headers })
+  const ranks = data?.data || []
+
+  return ranks.slice(0, 10).map((r) => ({
+    id: r.player?.id || r.id,
+    name: r.player?.name || r.name || r.full_name,
+    position: r.position,
+  }))
 }
 
 // Search tennis data via RapidAPI
@@ -50,7 +70,7 @@ router.get('/search', async (req, res, next) => {
       params: { search: q || 'ABC' },
       headers: {
         'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-        'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com',
+        'x-rapidapi-host': API_HOST,
       },
     }
 
