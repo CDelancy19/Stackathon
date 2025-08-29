@@ -10,3 +10,7 @@ This repo can be forked and cloned from https://github.com/CDelancy19/Stackathon
 After cloning to your machine run `npm install` to install needed dependencies.
 The app now uses SQLite for storage by default, so no PostgreSQL configuration is required.
 Running `npm run start:dev` will both start your server and build your client side files using webpack. After running, the app will immediately scrape for current tournaments.
+
+## Netlify Identity and Neon
+
+Sample Netlify Functions have been added under `netlify/functions` to illustrate how to use Netlify Identity JWTs with a Neon (Postgres) database. Provide a `DATABASE_URL` environment variable and the functions can store and retrieve favorited players and match subscriptions for authenticated users.
