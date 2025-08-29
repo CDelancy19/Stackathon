@@ -15,28 +15,40 @@ export const Home = () => {
 
 			<h4>Technologies Used:</h4>
 
-			<Accordion defaultActiveKey="0">
-				<Accordion.Item eventKey="0">
-					<Accordion.Header as={'h6'}>Google Api Calendar</Accordion.Header>
-					<Accordion.Body>
-						Used to add tournaments to the calendar
-					</Accordion.Body>
-				</Accordion.Item>
-				<Accordion.Item eventKey="1">
-					<Accordion.Header as={'h6'}>Nightmare.js</Accordion.Header>
-					<Accordion.Body>
-						Used to scrape the internet for the tournament information
-					</Accordion.Body>
-				</Accordion.Item>
-				<Accordion.Item eventKey="3">
-					<Accordion.Header as={'h6'}>React-Bootstrap</Accordion.Header>
-					<Accordion.Body>
-						Used to make things look pretty
-					</Accordion.Body>
-				</Accordion.Item>
-			</Accordion>
-		</div>
-	);
+                        <Accordion defaultActiveKey="0">
+                                <Accordion.Item eventKey="0">
+                                        <Accordion.Header as={'h6'}>Google Calendar API</Accordion.Header>
+                                        <Accordion.Body>
+                                                Adds tournaments directly to your Google Calendar
+                                        </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="1">
+                                        <Accordion.Header as={'h6'}>Nightmare.js</Accordion.Header>
+                                        <Accordion.Body>
+                                                Scrapes tournament information from the web
+                                        </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="2">
+                                        <Accordion.Header as={'h6'}>SQLite & Sequelize</Accordion.Header>
+                                        <Accordion.Body>
+                                                Stores scraped data using a lightweight SQL database
+                                        </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="3">
+                                        <Accordion.Header as={'h6'}>React-Bootstrap</Accordion.Header>
+                                        <Accordion.Body>
+                                                Provides responsive UI components
+                                        </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="4">
+                                        <Accordion.Header as={'h6'}>Netlify Identity & Neon</Accordion.Header>
+                                        <Accordion.Body>
+                                                Serverless functions use Netlify Identity for auth and Neon for persistent storage
+                                        </Accordion.Body>
+                                </Accordion.Item>
+                        </Accordion>
+                </div>
+        );
 };
 
 export default Home;
