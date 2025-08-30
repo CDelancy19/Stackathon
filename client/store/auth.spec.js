@@ -1,12 +1,12 @@
 /* global describe beforeEach afterEach it */
 
-import {expect} from 'chai'
-import {me, logout} from './auth'
-import axios from 'axios'
-import MockAdapter from 'axios-mock-adapter'
-import configureMockStore from 'redux-mock-store'
-import thunkMiddleware from 'redux-thunk'
-import history from '../history'
+const {expect} = require('chai')
+const {me, logout} = require('./auth.js')
+const axios = require('axios')
+const MockAdapter = require('axios-mock-adapter')
+const configureMockStore = require('redux-mock-store').default
+const thunkMiddleware = require('redux-thunk').default.default || require('redux-thunk').default
+const history = require('../history.js').default
 
 const middlewares = [thunkMiddleware]
 const mockStore = configureMockStore(middlewares)
@@ -51,7 +51,7 @@ describe('thunk creators', () => {
         }
       })
       it('eventually dispatches the SET_AUTH action', async () => {
-        const fakeUser = {username: 'Cody'}
+        const fakeUser = {email: 'cody@example.com'}
         mockAxios.onGet('/auth/me').replyOnce(200, fakeUser)
         await store.dispatch(me())
         const actions = store.getActions()
@@ -70,7 +70,7 @@ describe('thunk creators', () => {
         }
       })
       it('does not dispatch GET USER action', async () => {
-        const fakeUser = {username: 'Cody'}
+        const fakeUser = {email: 'cody@example.com'}
         mockAxios.onGet('/auth/me').replyOnce(200, fakeUser)
         await store.dispatch(me())
         const actions = store.getActions()

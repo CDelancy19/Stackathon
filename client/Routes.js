@@ -1,26 +1,69 @@
-import React, { Component, Fragment } from 'react';
-import { withRouter, Route, Switch } from 'react-router-dom';
+import React, { Component } from 'react';
+import { withRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { me } from './store';
 import Calendar from './components/Calendar';
 import Home from './components/Home';
 import Next from './components/Next';
+import { Login, Signup } from './components/AuthForm';
 
 /**
  * COMPONENT
  */
 class Routes extends Component {
-	render() {
-		return (
-			<div>
-				<Switch>
-					<Route exact path="/" component={Home} />
-					<Route path="/calendar" component={Calendar} />
-					<Route path="/next" component={Next} />
-				</Switch>
-			</div>
-		);
-	}
+        componentDidMount() {
+                this.props.loadInitialData();
+        }
+
+        render() {
+                const { isLoggedIn } = this.props;
+
+                return (
+                        <div>
+                                <Switch>
+                                        <Route exact path="/" component={Home} />
+                                        <Route path="/login" component={Login} />
+                                        <Route path="/signup" component={Signup} />
+                                        <Route
+                                                path="/calendar"
+                                                render={() =>
+                                                        isLoggedIn ? (
+                                                                <Calendar />
+                                                        ) : (
+                                                                <Redirect to="/login" />
+                                                        )
+                                                }
+                                        />
+                                        <Route
+                                                path="/next"
+                                                render={() =>
+                                                        isLoggedIn ? (
+                                                                <Next />
+                                                        ) : (
+                                                                <Redirect to="/login" />
+                                                        )
+                                                }
+                                        />
+                                </Switch>
+                        </div>
+                );
+        }
 }
+
+const mapState = (state) => {
+        return {
+                isLoggedIn: !!state.auth.id,
+        };
+};
+
+const mapDispatch = (dispatch) => {
+        return {
+                loadInitialData() {
+                        dispatch(me());
+                },
+        };
+};
 
 // The `withRouter` wrapper makes sure that updates are not blocked
 // when the url changes
-export default withRouter(Routes);
+export default withRouter(connect(mapState, mapDispatch)(Routes));

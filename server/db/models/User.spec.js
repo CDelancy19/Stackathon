@@ -22,13 +22,14 @@ describe('User model', () => {
     describe('authenticate', () => {
       let user;
       beforeEach(async()=> user = await User.create({
-        username: 'lucy',
+        name: 'Lucy',
+        email: 'lucy@example.com',
         password: 'loo'
       }));
       describe('with correct credentials', ()=> {
         it('returns a token', async() => {
           const token = await User.authenticate({
-            username: 'lucy',
+            email: 'lucy@example.com',
             password: 'loo'
           });
           expect(token).to.be.ok;
@@ -39,7 +40,7 @@ describe('User model', () => {
 
           try {
             await User.authenticate({
-              username: 'lucy@gmail.com',
+              email: 'lucy@gmail.com',
               password: '123'
             });
             throw 'nooo';
