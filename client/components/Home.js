@@ -15,6 +15,11 @@ export const Home = () => {
         setInfo(data);
       } catch (err) {
         console.error(err);
+        setInfo({
+          tournaments: [{ id: 'none', name: 'No tournaments available' }],
+          atpTop: [{ id: 'none', name: 'No rankings available' }],
+          wtaTop: [{ id: 'none', name: 'No rankings available' }],
+        });
       }
     }
     loadData();
