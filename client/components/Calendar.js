@@ -1,55 +1,90 @@
+/* global gapi */
 import React, { useEffect, useState } from 'react';
 import ApiCalendar from 'react-google-calendar-api';
 
-// Calendars formerly embedded via iframe
-const CALENDAR_IDS = [
-  'e527mg89157iu9jrsomarru2s4@group.calendar.google.com',
-  'rdvbondihar5bnq15nmjd9l0ic@group.calendar.google.com',
-];
+const FAVORITES_CALENDAR = 'Favorite Players';
 
-const Calendar = () => {
-  const [events, setEvents] = useState([]);
+// Create or fetch a calendar dedicated to favorited players
+async function getFavoritesCalendarId() {
+  const list = await gapi.client.calendar.calendarList.list();
+  const existing = list.result.items.find((c) => c.summary === FAVORITES_CALENDAR);
+  if (existing) return existing.id;
+  const created = await gapi.client.calendar.calendars.insert({
+    summary: FAVORITES_CALENDAR,
+  });
+  return created.result.id;
+}
 
+const Calendar = ({ favorites = [] }) => {
+  const [calendarId, setCalendarId] = useState(null);
+
+  // Authenticate and ensure the favorites calendar exists
   useEffect(() => {
     ApiCalendar.onLoad(() => {
-      const now = new Date();
-      Promise.all(
-        CALENDAR_IDS.map((calendarId) =>
-          ApiCalendar.listEvents({
-            calendarId,
-            timeMin: now.toISOString(),
-            singleEvents: true,
-            orderBy: 'startTime',
-            maxResults: 20,
-          })
-        )
-      )
-        .then((responses) => {
-          const all = responses.reduce((acc, { result }) => {
-            return acc.concat(result.items || []);
-          }, []);
-          all.sort(
-            (a, b) =>
-              new Date(a.start.dateTime || a.start.date) -
-              new Date(b.start.dateTime || b.start.date)
-          );
-          setEvents(all);
-        })
+      ApiCalendar.handleAuthClick()
+        .then(getFavoritesCalendarId)
+        .then(setCalendarId)
         .catch((err) => console.error(err));
     });
   }, []);
 
+  // Sync Google Calendar whenever favorites change
+  useEffect(() => {
+    if (!calendarId) return;
+    const sync = async () => {
+      try {
+        // Clear existing events
+        const { result } = await ApiCalendar.listEvents({ calendarId });
+        await Promise.all(
+          (result.items || []).map((e) => ApiCalendar.deleteEvent(e.id, calendarId))
+        );
+
+        if (!favorites.length) return;
+
+        const matches = await fetch('/api/matches').then((r) => r.json());
+        const relevant = matches.filter(
+          (m) => favorites.includes(m.player1) || favorites.includes(m.player2)
+        );
+
+        await Promise.all(
+          relevant.map((m) => {
+            const start = new Date(m.date).toISOString();
+            const end = new Date(new Date(m.date).getTime() + 2 * 60 * 60 * 1000).toISOString();
+            return ApiCalendar.createEvent(
+              {
+                summary: `${m.player1} vs ${m.player2}`,
+                description: m.tournament?.name || '',
+                start: { dateTime: start },
+                end: { dateTime: end },
+              },
+              calendarId
+            );
+          })
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    sync();
+  }, [favorites, calendarId]);
+
+  if (!calendarId) return <div className="calendar">Loading...</div>;
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const src = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(
+    calendarId
+  )}&ctz=${encodeURIComponent(timeZone)}`;
+
   return (
     <div className="calendar">
-      <h3>Upcoming Events</h3>
-      <ul>
-        {events.map((e) => (
-          <li key={e.id}>
-            {e.summary} -
-            {` ${new Date(e.start.dateTime || e.start.date).toLocaleDateString()}`}
-          </li>
-        ))}
-      </ul>
+      <iframe
+        src={src}
+        style={{ border: 0 }}
+        width="800"
+        height="600"
+        frameBorder="0"
+        scrolling="no"
+      />
     </div>
   );
 };
