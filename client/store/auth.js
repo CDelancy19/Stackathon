@@ -1,7 +1,19 @@
-import axios from 'axios'
-import history from '../history'
+let StackClientApp
+if (process.env.NODE_ENV === 'test') {
+  StackClientApp = class {}
+} else {
+  ;({ StackClientApp } = require('@stackframe/js'))
+}
+const history = require('../history.js').default
 
-const TOKEN = 'token'
+let stack = new StackClientApp({
+  projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
+  publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+})
+
+export const __setStackClient = client => {
+  stack = client
+}
 
 /**
  * ACTION TYPES
@@ -11,40 +23,62 @@ const SET_AUTH = 'SET_AUTH'
 /**
  * ACTION CREATORS
  */
-const setAuth = auth => ({type: SET_AUTH, auth})
+const setAuth = auth => ({ type: SET_AUTH, auth })
 
 /**
  * THUNK CREATORS
  */
 export const me = () => async dispatch => {
-  const token = window.localStorage.getItem(TOKEN)
-  if (token) {
-    const res = await axios.get('/auth/me', {
-      headers: {
-        authorization: token
-      }
-    })
-    return dispatch(setAuth(res.data))
-  }
-}
-
-export const authenticate = (username, password, method) => async dispatch => {
   try {
-    const res = await axios.post(`/auth/${method}`, {username, password})
-    window.localStorage.setItem(TOKEN, res.data.token)
-    dispatch(me())
-  } catch (authError) {
-    return dispatch(setAuth({error: authError}))
+    const user = await stack.getUser()
+    if (user) {
+      dispatch(setAuth(user))
+    }
+  } catch (err) {
+    // ignore retrieval errors
   }
 }
 
-export const logout = () => {
-  window.localStorage.removeItem(TOKEN)
-  history.push('/login')
-  return {
-    type: SET_AUTH,
-    auth: {}
+export const authenticate = (credentials, method) => async dispatch => {
+  try {
+    if (method === 'signup') {
+      await stack.signUpWithCredential({
+        email: credentials.email,
+        password: credentials.password,
+        noRedirect: true
+      })
+      const user = await stack.getUser()
+      if (user) {
+        await user.update({
+          displayName: credentials.name,
+          clientMetadata: credentials.phone ? { phone: credentials.phone } : undefined
+        })
+      }
+    } else {
+      await stack.signInWithCredential({
+        email: credentials.email,
+        password: credentials.password,
+        noRedirect: true
+      })
+    }
+    const user = await stack.getUser()
+    if (user) {
+      dispatch(setAuth(user))
+    }
+    history.push('/')
+  } catch (authError) {
+    dispatch(setAuth({ error: authError }))
   }
+}
+
+export const logout = () => async dispatch => {
+  try {
+    await stack.signOut()
+  } catch (err) {
+    // ignore sign out errors
+  }
+  history.push('/login')
+  dispatch(setAuth({}))
 }
 
 /**
