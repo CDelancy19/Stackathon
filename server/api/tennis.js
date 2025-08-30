@@ -4,7 +4,8 @@ const fs = require('fs')
 const path = require('path')
 
 const cachePath = path.join(__dirname, '..', 'cache', 'homeData.json')
-const API_HOST = 'tennis-api-atp-wta-itf.p.rapidapi.com'
+// Ultimate Tennis API host
+const API_HOST = 'ultimate-tennis1.p.rapidapi.com'
 
 // Helper to fetch tournaments currently being played
 const fetchCurrentTournaments = async () => {
@@ -23,15 +24,22 @@ const fetchCurrentTournaments = async () => {
 
     await Promise.all(
       tours.map(async (tour) => {
-        const url = `https://${API_HOST}/tennis/v2/${tour}/tournament/calendar/${year}`
+        // Ultimate Tennis API uses the /v1/tournaments endpoint with query params
+        const url = `https://${API_HOST}/v1/tournaments?type=${tour.toUpperCase()}&year=${year}`
         const { data } = await axios.get(url, { headers })
-        const events = data?.data || []
+        const events = data?.tournaments || data?.data || []
 
         events.forEach((evt) => {
-          const start = evt.date ? new Date(evt.date) : null
-          if (!start) return
-          const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24))
-          if (diffDays >= 0 && diffDays <= 7) {
+          // Try a variety of field names for robustness
+          const startRaw =
+            evt.start || evt.start_date || evt.startDate || evt.date || evt.begin
+          const endRaw =
+            evt.end || evt.end_date || evt.endDate || evt.finish || evt.finish_date
+          const start = startRaw ? new Date(startRaw) : null
+          const end = endRaw ? new Date(endRaw) : null
+
+          // Consider tournaments currently in progress
+          if (start && end && today >= start && today <= end) {
             results.push({ id: evt.id, name: evt.name })
           }
         })
@@ -55,14 +63,16 @@ const fetchTopPlayers = async (tour) => {
       'x-rapidapi-host': API_HOST,
     }
 
-    const url = `https://${API_HOST}/tennis/v2/${tour}/ranking/singles/`
+    const gender = tour === 'atp' ? 'men' : 'women'
+    // Use rankings endpoint; request top 10 singles players
+    const url = `https://${API_HOST}/v1/rankings?gender=${gender}&type=singles&top=10`
     const { data } = await axios.get(url, { headers })
-    const ranks = data?.data || []
+    const ranks = data?.rankings || data?.data || []
 
     return ranks.slice(0, 10).map((r) => ({
-      id: r.player?.id || r.id,
-      name: r.player?.name || r.name || r.full_name,
-      position: r.position,
+      id: r.player_id || r.player?.id || r.id,
+      name: r.player_name || r.player?.name || r.name,
+      position: r.rank || r.position,
     }))
   } catch (err) {
     console.error(err)
@@ -74,10 +84,12 @@ const fetchTopPlayers = async (tour) => {
 router.get('/search', async (req, res, next) => {
   try {
     const { q } = req.query
+    // The Ultimate Tennis API does not expose a direct search endpoint,
+    // but the players endpoint supports name filtering via the `name` query.
     const options = {
       method: 'GET',
-      url: 'https://tennis-api-atp-wta-itf.p.rapidapi.com/tennis/v2/search',
-      params: { search: q || 'ABC' },
+      url: `https://${API_HOST}/v1/players`,
+      params: { name: q || 'Novak Djokovic' },
       headers: {
         'x-rapidapi-key': process.env.RAPIDAPI_KEY,
         'x-rapidapi-host': API_HOST,
