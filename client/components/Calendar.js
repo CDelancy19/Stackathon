@@ -1,17 +1,58 @@
-import React, { Component, ReactNode, SyntheticEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 import ApiCalendar from 'react-google-calendar-api';
 
-export default class Calendar extends Component {
-	render() {
-		return (
-			<div>
-				<iframe
-					className="calendar"
-					src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FNew_York&title=Tennis%20Tournaments&src=ZTUyN21nODkxNTdpdTlqcnNvbWFycnUyczRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=cmR2Ym9uZGloYXI1Ym5xMTVubWpkOWwwaWNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%237CB342&color=%23B39DDB"
-					frameBorder="0"
-					scrolling="yes"
-				/>
-			</div>
-		);
-	}
-}
+// Calendars formerly embedded via iframe
+const CALENDAR_IDS = [
+  'e527mg89157iu9jrsomarru2s4@group.calendar.google.com',
+  'rdvbondihar5bnq15nmjd9l0ic@group.calendar.google.com',
+];
+
+const Calendar = () => {
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    ApiCalendar.onLoad(() => {
+      const now = new Date();
+      Promise.all(
+        CALENDAR_IDS.map((calendarId) =>
+          ApiCalendar.listEvents({
+            calendarId,
+            timeMin: now.toISOString(),
+            singleEvents: true,
+            orderBy: 'startTime',
+            maxResults: 20,
+          })
+        )
+      )
+        .then((responses) => {
+          const all = responses.reduce((acc, { result }) => {
+            return acc.concat(result.items || []);
+          }, []);
+          all.sort(
+            (a, b) =>
+              new Date(a.start.dateTime || a.start.date) -
+              new Date(b.start.dateTime || b.start.date)
+          );
+          setEvents(all);
+        })
+        .catch((err) => console.error(err));
+    });
+  }, []);
+
+  return (
+    <div className="calendar">
+      <h3>Upcoming Events</h3>
+      <ul>
+        {events.map((e) => (
+          <li key={e.id}>
+            {e.summary} -
+            {` ${new Date(e.start.dateTime || e.start.date).toLocaleDateString()}`}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default Calendar;
+
