@@ -16,7 +16,6 @@ async function getFavoritesCalendarId() {
 }
 
 const Calendar = ({ favorites = [] }) => {
-  const [events, setEvents] = useState([]);
   const [calendarId, setCalendarId] = useState(null);
 
   // Authenticate and ensure the favorites calendar exists
@@ -40,17 +39,14 @@ const Calendar = ({ favorites = [] }) => {
           (result.items || []).map((e) => ApiCalendar.deleteEvent(e.id, calendarId))
         );
 
-        if (!favorites.length) {
-          setEvents([]);
-          return;
-        }
+        if (!favorites.length) return;
 
         const matches = await fetch('/api/matches').then((r) => r.json());
         const relevant = matches.filter(
           (m) => favorites.includes(m.player1) || favorites.includes(m.player2)
         );
 
-        const created = await Promise.all(
+        await Promise.all(
           relevant.map((m) => {
             const start = new Date(m.date).toISOString();
             const end = new Date(new Date(m.date).getTime() + 2 * 60 * 60 * 1000).toISOString();
@@ -65,7 +61,6 @@ const Calendar = ({ favorites = [] }) => {
             );
           })
         );
-        setEvents(created.map((c) => c.result));
       } catch (err) {
         console.error(err);
       }
@@ -73,17 +68,23 @@ const Calendar = ({ favorites = [] }) => {
     sync();
   }, [favorites, calendarId]);
 
+  if (!calendarId) return <div className="calendar">Loading...</div>;
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const src = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(
+    calendarId
+  )}&ctz=${encodeURIComponent(timeZone)}`;
+
   return (
     <div className="calendar">
-      <h3>Upcoming Events</h3>
-      <ul>
-        {events.map((e) => (
-          <li key={e.id}>
-            {e.summary} -
-            {` ${new Date(e.start.dateTime || e.start.date).toLocaleDateString()}`}
-          </li>
-        ))}
-      </ul>
+      <iframe
+        src={src}
+        style={{ border: 0 }}
+        width="800"
+        height="600"
+        frameBorder="0"
+        scrolling="no"
+      />
     </div>
   );
 };
