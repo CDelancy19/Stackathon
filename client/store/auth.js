@@ -1,14 +1,19 @@
 let StackClientApp
-if (process.env.NODE_ENV === 'test') {
+// In a browser environment the global `process` object is not defined. Using
+// `typeof` avoids a ReferenceError when bundlers don't polyfill `process`.
+const env = typeof process !== 'undefined' ? process.env : {}
+if (env.NODE_ENV === 'test') {
   StackClientApp = class {}
 } else {
   ;({ StackClientApp } = require('@stackframe/js'))
 }
 const history = require('../history.js').default
 
+// Use the safe `env` wrapper above so that referencing environment variables
+// doesn't throw when `process` is unavailable in the browser.
 let stack = new StackClientApp({
-  projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
-  publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+  projectId: env.NEXT_PUBLIC_STACK_PROJECT_ID,
+  publishableClientKey: env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
 })
 export const __setStackClient = client => {
   stack = client
